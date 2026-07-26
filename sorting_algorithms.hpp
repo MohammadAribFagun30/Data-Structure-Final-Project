@@ -1,14 +1,15 @@
-#ifndef SORTING_ALGORITHMS_HPP
+#define SORTING_ALGORITHMS_HPP
 #define SORTING_ALGORITHMS_HPP
 
 #include <vector>
 #include <iostream>
 #include <cstring>
+#include <algorithm>  // ONLY for std::swap (allowed for swapping elements)
 
 class SortingAlgorithms {
 public:
     // ============================================================
-    // 1. INSERTION SORT - Optimized with shifting
+    // 1. INSERTION SORT - Optimized with shifting (O(n²))
     // ============================================================
     static void insertionSort(std::vector<int>& arr) {
         int n = arr.size();
@@ -26,7 +27,7 @@ public:
     }
     
     // ============================================================
-    // 2. SELECTION SORT - Baseline O(N²)
+    // 2. SELECTION SORT - Baseline O(n²)
     // ============================================================
     static void selectionSort(std::vector<int>& arr) {
         int n = arr.size();
@@ -44,7 +45,7 @@ public:
     }
     
     // ============================================================
-    // 3. HEAP SORT - Array-based Max-Heap
+    // 3. HEAP SORT - Array-based Max-Heap (O(n log n))
     // ============================================================
 private:
     static void heapify(std::vector<int>& arr, int n, int i) {
@@ -94,7 +95,7 @@ public:
         }
     }
     
-    // Extract top K elements using heap without full sort
+    // Extract top K elements without full sort
     static std::vector<int> extractTopK(std::vector<int>& arr, int k) {
         int n = arr.size();
         buildHeap(arr);
@@ -110,7 +111,7 @@ public:
     }
     
     // ============================================================
-    // 4. COUNTING SORT - Stable version
+    // 4. COUNTING SORT - Stable integer sort (O(n + k))
     // ============================================================
     static void countingSort(std::vector<int>& arr, int maxVal = -1) {
         if (arr.empty()) return;
@@ -137,7 +138,7 @@ public:
             count[i] += count[i - 1];
         }
         
-        // Build output array (stable)
+        // Build output array (stable - iterating from end)
         for (int i = n - 1; i >= 0; i--) {
             output[count[arr[i]] - 1] = arr[i];
             count[arr[i]]--;
@@ -150,13 +151,13 @@ public:
     }
     
     // ============================================================
-    // 5. RADIX SORT - Base-10 using Counting Sort as subroutine
+    // 5. RADIX SORT - Base-10 using Counting Sort (O(d * (n + k)))
     // ============================================================
 private:
     static void countingSortByDigit(std::vector<int>& arr, int exp) {
         int n = arr.size();
         std::vector<int> output(n);
-        std::vector<int> count(10, 0);
+        std::vector<int> count(10, 0);  // Base-10 digits (0-9)
         
         // Count occurrences of each digit
         for (int i = 0; i < n; i++) {
@@ -164,12 +165,12 @@ private:
             count[digit]++;
         }
         
-        // Cumulative sum
+        // Cumulative sum for stable sorting
         for (int i = 1; i < 10; i++) {
             count[i] += count[i - 1];
         }
         
-        // Build output (stable)
+        // Build output (stable - iterating from end)
         for (int i = n - 1; i >= 0; i--) {
             int digit = (arr[i] / exp) % 10;
             output[count[digit] - 1] = arr[i];
@@ -197,6 +198,76 @@ public:
             countingSortByDigit(arr, exp);
         }
     }
+    
+    // ============================================================
+    // 6. BUBBLE SORT - Additional O(n²) for comparison
+    // ============================================================
+    static void bubbleSort(std::vector<int>& arr) {
+        int n = arr.size();
+        for (int i = 0; i < n - 1; i++) {
+            bool swapped = false;
+            for (int j = 0; j < n - i - 1; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    std::swap(arr[j], arr[j + 1]);
+                    swapped = true;
+                }
+            }
+            if (!swapped) break;
+        }
+    }
+    
+    // ============================================================
+    // 7. MERGE SORT - Additional O(n log n) for comparison
+    // ============================================================
+private:
+    static void merge(std::vector<int>& arr, int left, int mid, int right) {
+        int n1 = mid - left + 1;
+        int n2 = right - mid;
+        
+        std::vector<int> L(n1);
+        std::vector<int> R(n2);
+        
+        for (int i = 0; i < n1; i++) L[i] = arr[left + i];
+        for (int j = 0; j < n2; j++) R[j] = arr[mid + 1 + j];
+        
+        int i = 0, j = 0, k = left;
+        
+        while (i < n1 && j < n2) {
+            if (L[i] <= R[j]) {
+                arr[k] = L[i];
+                i++;
+            } else {
+                arr[k] = R[j];
+                j++;
+            }
+            k++;
+        }
+        
+        while (i < n1) {
+            arr[k] = L[i];
+            i++;
+            k++;
+        }
+        
+        while (j < n2) {
+            arr[k] = R[j];
+            j++;
+            k++;
+        }
+    }
+    
+    static void mergeSortRecursive(std::vector<int>& arr, int left, int right) {
+        if (left < right) {
+            int mid = left + (right - left) / 2;
+            mergeSortRecursive(arr, left, mid);
+            mergeSortRecursive(arr, mid + 1, right);
+            merge(arr, left, mid, right);
+        }
+    }
+    
+public:
+    static void mergeSort(std::vector<int>& arr) {
+        mergeSortRecursive(arr, 0, arr.size() - 1);
+    }
 };
 
-#endif

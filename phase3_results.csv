@@ -1,6 +1,11 @@
-Size,HeapSortTime(μs),RadixSortTime(μs)
-10000,2005,0
-50000,1249,4758
-100000,7257,1003
-500000,32302,30729
-1000000,82115,49146
+Phase,Algorithm,DatasetSize,DataType,TimeMicroseconds
+Phase 3 Overtake Check,Heap Sort,50000,5-Digit Postal Codes,3901
+Phase 3 Overtake Check,Radix Sort,50000,5-Digit Postal Codes,0
+Phase 3 Overtake Check,Heap Sort,100000,5-Digit Postal Codes,6086
+Phase 3 Overtake Check,Radix Sort,100000,5-Digit Postal Codes,6173
+Phase 3 Overtake Check,Heap Sort,250000,5-Digit Postal Codes,17446
+Phase 3 Overtake Check,Radix Sort,250000,5-Digit Postal Codes,12405
+Phase 3 Overtake Check,Heap Sort,500000,5-Digit Postal Codes,36081
+Phase 3 Overtake Check,Radix Sort,500000,5-Digit Postal Codes,20073
+Phase 3 Overtake Check,Heap Sort,1000000,5-Digit Postal Codes,82036
+Phase 3 Overtake Check,Radix Sort,1000000,5-Digit Postal Codes,45972

@@ -4,15 +4,14 @@
 #include <chrono>
 #include <fstream>
 #include <iomanip>
-#include <algorithm>
 #include <numeric>
+#include <cstdint>
 #include "sorting_algorithms.hpp"
 
 // ============================================================
 // Helper Functions
 // ============================================================
 
-// Generate random vector
 std::vector<int> generateRandomVector(int size, int minVal = 0, int maxVal = 100000) {
     std::vector<int> vec(size);
     std::random_device rd;
@@ -25,31 +24,27 @@ std::vector<int> generateRandomVector(int size, int minVal = 0, int maxVal = 100
     return vec;
 }
 
-// Generate nearly sorted vector (only last 2 elements out of place)
 std::vector<int> generateNearlySortedVector(int size) {
     std::vector<int> vec(size);
     for (int i = 0; i < size; i++) {
         vec[i] = i;
     }
-    // Swap last two elements to make it nearly sorted
     if (size >= 2) {
         std::swap(vec[size - 1], vec[size - 2]);
     }
     return vec;
 }
 
-// Generate 5-digit postal codes (00000-99999)
 std::vector<int> generatePostalCodes(int size) {
     return generateRandomVector(size, 0, 99999);
 }
 
-// Copy vector
 std::vector<int> copyVector(const std::vector<int>& src) {
     return src;
 }
 
 // ============================================================
-// Experiment 1: Micro-Scale - Active Shopping Carts
+// Experiment 1: Micro-Scale (N=50)
 // ============================================================
 
 void experiment1_MicroScale() {
@@ -58,63 +53,76 @@ void experiment1_MicroScale() {
     std::cout << std::string(60, '=') << "\n";
     
     const int N = 50;
+    const int REPETITIONS = 100000;
     
-    // Generate datasets
     std::vector<int> randomData = generateRandomVector(N, 0, 100);
     std::vector<int> nearlySortedData = generateNearlySortedVector(N);
     
-    std::cout << "\n[1] Random Data (N=" << N << "):\n";
+    long long totalInsertionRandom = 0, totalSelectionRandom = 0;
+    long long totalInsertionNearly = 0, totalSelectionNearly = 0;
     
-    // Insertion Sort on Random Data
-    std::vector<int> data1 = copyVector(randomData);
-    auto start = std::chrono::high_resolution_clock::now();
-    SortingAlgorithms::insertionSort(data1);
-    auto end = std::chrono::high_resolution_clock::now();
-    auto insertionRandom = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    // Run tests with repetitions for accurate timing
+    for (int r = 0; r < REPETITIONS; r++) {
+        // Insertion Sort - Random
+        std::vector<int> data = copyVector(randomData);
+        auto start = std::chrono::high_resolution_clock::now();
+        SortingAlgorithms::insertionSort(data);
+        auto end = std::chrono::high_resolution_clock::now();
+        totalInsertionRandom += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        
+        // Selection Sort - Random
+        data = copyVector(randomData);
+        start = std::chrono::high_resolution_clock::now();
+        SortingAlgorithms::selectionSort(data);
+        end = std::chrono::high_resolution_clock::now();
+        totalSelectionRandom += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        
+        // Insertion Sort - Nearly Sorted
+        data = copyVector(nearlySortedData);
+        start = std::chrono::high_resolution_clock::now();
+        SortingAlgorithms::insertionSort(data);
+        end = std::chrono::high_resolution_clock::now();
+        totalInsertionNearly += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        
+        // Selection Sort - Nearly Sorted
+        data = copyVector(nearlySortedData);
+        start = std::chrono::high_resolution_clock::now();
+        SortingAlgorithms::selectionSort(data);
+        end = std::chrono::high_resolution_clock::now();
+        totalSelectionNearly += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    }
     
-    // Selection Sort on Random Data
-    std::vector<int> data2 = copyVector(randomData);
-    start = std::chrono::high_resolution_clock::now();
-    SortingAlgorithms::selectionSort(data2);
-    end = std::chrono::high_resolution_clock::now();
-    auto selectionRandom = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    // Calculate averages
+    long long avgInsertionRandom = totalInsertionRandom / REPETITIONS;
+    long long avgSelectionRandom = totalSelectionRandom / REPETITIONS;
+    long long avgInsertionNearly = totalInsertionNearly / REPETITIONS;
+    long long avgSelectionNearly = totalSelectionNearly / REPETITIONS;
     
-    std::cout << "  Insertion Sort: " << insertionRandom.count() << " μs\n";
-    std::cout << "  Selection Sort: " << selectionRandom.count() << " μs\n";
+    std::cout << "\n[1] Random Data (N=" << N << ", repeated " << REPETITIONS << "x):\n";
+    std::cout << "  Insertion Sort: " << avgInsertionRandom << " μs\n";
+    std::cout << "  Selection Sort: " << avgSelectionRandom << " μs\n";
     
-    std::cout << "\n[2] Nearly Sorted Data (N=" << N << "):\n";
+    std::cout << "\n[2] Nearly Sorted Data (N=" << N << ", repeated " << REPETITIONS << "x):\n";
+    std::cout << "  Insertion Sort: " << avgInsertionNearly << " μs\n";
+    std::cout << "  Selection Sort: " << avgSelectionNearly << " μs\n";
     
-    // Insertion Sort on Nearly Sorted Data
-    data1 = copyVector(nearlySortedData);
-    start = std::chrono::high_resolution_clock::now();
-    SortingAlgorithms::insertionSort(data1);
-    end = std::chrono::high_resolution_clock::now();
-    auto insertionNearly = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    
-    // Selection Sort on Nearly Sorted Data
-    data2 = copyVector(nearlySortedData);
-    start = std::chrono::high_resolution_clock::now();
-    SortingAlgorithms::selectionSort(data2);
-    end = std::chrono::high_resolution_clock::now();
-    auto selectionNearly = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    
-    std::cout << "  Insertion Sort: " << insertionNearly.count() << " μs\n";
-    std::cout << "  Selection Sort: " << selectionNearly.count() << " μs\n";
-    std::cout << "\n  Speedup (Insertion on Nearly Sorted vs Random): " 
-              << (double)insertionRandom.count() / insertionNearly.count() << "x\n";
+    double speedup = (double)avgInsertionRandom / avgInsertionNearly;
+    std::cout << "\n  ⚡ Speedup (Insertion on Nearly Sorted vs Random): " << std::fixed << std::setprecision(2) << speedup << "x\n";
     
     // Export to CSV
     std::ofstream file("phase1_results.csv");
-    file << "Dataset,Algorithm,Time(μs)\n";
-    file << "Random,InsertionSort," << insertionRandom.count() << "\n";
-    file << "Random,SelectionSort," << selectionRandom.count() << "\n";
-    file << "NearlySorted,InsertionSort," << insertionNearly.count() << "\n";
-    file << "NearlySorted,SelectionSort," << selectionNearly.count() << "\n";
+    file << "Phase,Algorithm,DatasetSize,DataType,TimeMicroseconds\n";
+    file << "Phase 1,Insertion Sort,50,Random repeated " << REPETITIONS << "x," << avgInsertionRandom << "\n";
+    file << "Phase 1,Selection Sort,50,Random repeated " << REPETITIONS << "x," << avgSelectionRandom << "\n";
+    file << "Phase 1,Insertion Sort,50,Nearly Sorted repeated " << REPETITIONS << "x," << avgInsertionNearly << "\n";
+    file << "Phase 1,Selection Sort,50,Nearly Sorted repeated " << REPETITIONS << "x," << avgSelectionNearly << "\n";
     file.close();
+    
+    std::cout << "\n✅ Phase 1 results exported to phase1_results.csv\n";
 }
 
 // ============================================================
-// Experiment 2: VIP Extraction - Flash Sale
+// Experiment 2: VIP Extraction (N=100000, K=500)
 // ============================================================
 
 void experiment2_VIPExtraction() {
@@ -129,7 +137,7 @@ void experiment2_VIPExtraction() {
     
     std::cout << "\nExtracting Top " << K << " from " << N << " elements...\n";
     
-    // Method 1: Full Heap Sort then take top K
+    // Method 1: Full Heap Sort + Take Top K
     std::vector<int> data1 = copyVector(data);
     auto start = std::chrono::high_resolution_clock::now();
     SortingAlgorithms::heapSort(data1);
@@ -145,19 +153,21 @@ void experiment2_VIPExtraction() {
     
     std::cout << "\n[1] Full Heap Sort + Take Top " << K << ": " << fullSortTime.count() << " μs\n";
     std::cout << "[2] Build Heap + Extract Max " << K << " times: " << heapExtractTime.count() << " μs\n";
-    std::cout << "\n  Speedup (Method 2 vs Method 1): " 
-              << (double)fullSortTime.count() / heapExtractTime.count() << "x\n";
+    std::cout << "\n  ⚡ Speedup (Method 2 vs Method 1): " 
+              << std::fixed << std::setprecision(2) << (double)fullSortTime.count() / heapExtractTime.count() << "x\n";
     
     // Export to CSV
     std::ofstream file("phase2_results.csv");
-    file << "Method,Time(μs)\n";
-    file << "FullSort," << fullSortTime.count() << "\n";
-    file << "HeapExtract," << heapExtractTime.count() << "\n";
+    file << "Phase,Algorithm,DatasetSize,DataType,TimeMicroseconds\n";
+    file << "Phase 2,Heap Sort Full Array," << N << ",Top " << K << " Extraction," << fullSortTime.count() << "\n";
+    file << "Phase 2,Build Heap + " << K << " Extract Max," << N << ",Top " << K << " Extraction," << heapExtractTime.count() << "\n";
     file.close();
+    
+    std::cout << "\n✅ Phase 2 results exported to phase2_results.csv\n";
 }
 
 // ============================================================
-// Experiment 3: Macro-Scale Routing - End-of-Day Logistics
+// Experiment 3: Macro-Scale with Overtake Detection
 // ============================================================
 
 void experiment3_MacroScale() {
@@ -165,20 +175,23 @@ void experiment3_MacroScale() {
     std::cout << "PHASE 3: Macro-Scale Routing (End-of-Day Logistics)\n";
     std::cout << std::string(60, '=') << "\n";
     
-    std::vector<int> sizes = {10000, 50000, 100000, 500000, 1000000};
+    std::vector<int> sizes = {50000, 100000, 250000, 500000, 1000000};
     
-    std::cout << "\nComparing Heap Sort vs Radix Sort on postal codes (5-digit):\n";
-    std::cout << std::string(70, '-') << "\n";
+    std::cout << "\n🔍 Finding the exact point where Radix Sort overtakes Heap Sort...\n";
+    std::cout << "\nComparing Heap Sort vs Radix Sort on 5-digit postal codes:\n";
+    std::cout << std::string(90, '-') << "\n";
     std::cout << std::setw(12) << "Size" 
               << std::setw(20) << "Heap Sort (μs)" 
               << std::setw(20) << "Radix Sort (μs)"
-              << std::setw(15) << "Speedup" << "\n";
-    std::cout << std::string(70, '-') << "\n";
+              << std::setw(15) << "Speedup"
+              << std::setw(25) << "Winner" << "\n";
+    std::cout << std::string(90, '-') << "\n";
     
     std::ofstream file("phase3_results.csv");
-    file << "Size,HeapSortTime(μs),RadixSortTime(μs)\n";
+    file << "Phase,Algorithm,DatasetSize,DataType,TimeMicroseconds\n";
     
     int threshold = -1;
+    std::vector<long long> heapTimes, radixTimes;
     
     for (int size : sizes) {
         std::vector<int> data = generatePostalCodes(size);
@@ -197,16 +210,21 @@ void experiment3_MacroScale() {
         end = std::chrono::high_resolution_clock::now();
         auto radixTime = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
         
+        heapTimes.push_back(heapTime.count());
+        radixTimes.push_back(radixTime.count());
+        
         double speedup = (double)heapTime.count() / radixTime.count();
+        std::string winner = (heapTime.count() < radixTime.count()) ? "Heap Sort Wins" : "Radix Sort Wins";
         
         std::cout << std::setw(12) << size 
                   << std::setw(20) << heapTime.count()
                   << std::setw(20) << radixTime.count()
-                  << std::setw(14) << std::fixed << std::setprecision(2) << speedup << "x\n";
+                  << std::setw(14) << std::fixed << std::setprecision(2) << speedup << "x"
+                  << std::setw(25) << winner << "\n";
         
-        file << size << "," << heapTime.count() << "," << radixTime.count() << "\n";
+        file << "Phase 3 Overtake Check,Heap Sort," << size << ",5-Digit Postal Codes," << heapTime.count() << "\n";
+        file << "Phase 3 Overtake Check,Radix Sort," << size << ",5-Digit Postal Codes," << radixTime.count() << "\n";
         
-        // Detect when Radix Sort becomes faster
         if (threshold == -1 && radixTime.count() < heapTime.count()) {
             threshold = size;
         }
@@ -214,7 +232,104 @@ void experiment3_MacroScale() {
     
     file.close();
     
-    std::cout << "\nRadix Sort becomes faster than Heap Sort at N = " << threshold << "\n";
+    std::cout << std::string(90, '-') << "\n\n";
+    std::cout << "📊 OVERTAKE ANALYSIS RESULTS:\n";
+    std::cout << std::string(50, '-') << "\n";
+    
+    if (threshold != -1) {
+        std::cout << "✅ Radix Sort overtakes Heap Sort at N = " << threshold << "\n";
+    } else {
+        std::cout << "⚠️ Radix Sort did not overtake Heap Sort in the tested range.\n";
+    }
+    
+    std::cout << "\n✅ Phase 3 results exported to phase3_results.csv\n";
+}
+
+// ============================================================
+// Bonus: 64-bit Memory Bandwidth Bottleneck
+// ============================================================
+
+void bonus_MemoryBandwidth() {
+    std::cout << "\n" << std::string(60, '=') << "\n";
+    std::cout << "BONUS: 64-bit Memory Bandwidth Bottleneck\n";
+    std::cout << std::string(60, '=') << "\n";
+    
+    const int N = 5000000;
+    
+    std::cout << "\nTesting Radix Sort on " << N << " elements...\n";
+    std::cout << std::string(60, '-') << "\n";
+    
+    // Test A: 32-bit integers
+    std::vector<uint32_t> data32(N);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<uint32_t> dist(0, 99999);
+    
+    for (int i = 0; i < N; i++) {
+        data32[i] = dist(gen);
+    }
+    
+    auto start = std::chrono::high_resolution_clock::now();
+    std::vector<int> data32int(data32.begin(), data32.end());
+    SortingAlgorithms::radixSort(data32int);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto time32 = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    
+    std::cout << "Test A (uint32_t): " << time32.count() << " μs\n";
+    std::cout << "  Memory usage: " << (N * sizeof(uint32_t)) / (1024 * 1024) << " MB\n";
+    
+    // Test B: 64-bit integers (Custom implementation)
+    std::vector<uint64_t> data64(N);
+    std::mt19937_64 gen64(rd());
+    std::uniform_int_distribution<uint64_t> dist64(0, 99999);
+    
+    for (int i = 0; i < N; i++) {
+        data64[i] = dist64(gen64);
+    }
+    
+    start = std::chrono::high_resolution_clock::now();
+    // Custom 64-bit Radix Sort (byte-by-byte)
+    for (int byte = 0; byte < 8; byte++) {
+        std::vector<uint64_t> output(N);
+        std::vector<int> count(256, 0);
+        
+        for (int i = 0; i < N; i++) {
+            int digit = (data64[i] >> (byte * 8)) & 0xFF;
+            count[digit]++;
+        }
+        
+        for (int i = 1; i < 256; i++) {
+            count[i] += count[i - 1];
+        }
+        
+        for (int i = N - 1; i >= 0; i--) {
+            int digit = (data64[i] >> (byte * 8)) & 0xFF;
+            output[count[digit] - 1] = data64[i];
+            count[digit]--;
+        }
+        
+        for (int i = 0; i < N; i++) {
+            data64[i] = output[i];
+        }
+    }
+    end = std::chrono::high_resolution_clock::now();
+    auto time64 = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    
+    std::cout << "Test B (uint64_t): " << time64.count() << " μs\n";
+    std::cout << "  Memory usage: " << (N * sizeof(uint64_t)) / (1024 * 1024) << " MB\n";
+    
+    std::cout << std::string(60, '-') << "\n";
+    std::cout << "Slowdown (64-bit vs 32-bit): " << std::fixed << std::setprecision(2) 
+              << (double)time64.count() / time32.count() << "x\n";
+    std::cout << "Memory difference: 2x (64-bit uses twice the RAM)\n";
+    
+    std::ofstream file("bonus_results.csv");
+    file << "Phase,Algorithm,DatasetSize,DataType,TimeMicroseconds\n";
+    file << "Bonus,Radix Sort uint32_t," << N << ",5-Digit Postal Codes," << time32.count() << "\n";
+    file << "Bonus,Radix Sort uint64_t," << N << ",5-Digit Postal Codes," << time64.count() << "\n";
+    file.close();
+    
+    std::cout << "\n✅ Bonus results exported to bonus_results.csv\n";
 }
 
 // ============================================================
@@ -226,14 +341,22 @@ int main() {
     std::cout << "============================================================\n";
     std::cout << "   E-COMMERCE SORTING PIPELINE - PERFORMANCE ANALYSIS\n";
     std::cout << "============================================================\n";
+    std::cout << "   All algorithms implemented from scratch (No std::sort)\n";
+    std::cout << "============================================================\n";
     
-    // Run all experiments
     experiment1_MicroScale();
     experiment2_VIPExtraction();
     experiment3_MacroScale();
+    bonus_MemoryBandwidth();
     
     std::cout << "\n" << std::string(60, '=') << "\n";
-    std::cout << "All experiments completed. Results exported to CSV files.\n";
+    std::cout << "✅ All experiments completed!\n";
+    std::cout << "📁 CSV files created:\n";
+    std::cout << "   - phase1_results.csv\n";
+    std::cout << "   - phase2_results.csv\n";
+    std::cout << "   - phase3_results.csv\n";
+    std::cout << "   - bonus_results.csv\n";
+    std::cout << "📊 Run 'python analysis.py' to generate visualizations.\n";
     std::cout << std::string(60, '=') << "\n\n";
     
     return 0;

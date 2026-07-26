@@ -1,5 +1,5 @@
-Dataset,Algorithm,Time(μs)
-Random,InsertionSort,0
-Random,SelectionSort,0
-NearlySorted,InsertionSort,0
-NearlySorted,SelectionSort,0
+Phase,Algorithm,DatasetSize,DataType,TimeMicroseconds
+Phase 1,Insertion Sort,50,Random repeated 100000x,0
+Phase 1,Selection Sort,50,Random repeated 100000x,0
+Phase 1,Insertion Sort,50,Nearly Sorted repeated 100000x,0
+Phase 1,Selection Sort,50,Nearly Sorted repeated 100000x,0
