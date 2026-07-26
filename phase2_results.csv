@@ -1,0 +1,3 @@
+Method,Time(μs)
+FullSort,10400
+HeapExtract,1039

@@ -1,0 +1,3 @@
+Type,Size,Time(ms),Memory(MB)
+32-bit,5000000,365,19
+64-bit,5000000,194,38

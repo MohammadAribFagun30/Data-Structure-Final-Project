@@ -1,0 +1,5 @@
+Dataset,Algorithm,Time(μs)
+Random,InsertionSort,0
+Random,SelectionSort,0
+NearlySorted,InsertionSort,0
+NearlySorted,SelectionSort,0
