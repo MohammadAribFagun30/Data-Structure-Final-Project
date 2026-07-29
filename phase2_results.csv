@@ -1,3 +1,3 @@
 Phase,Algorithm,DatasetSize,DataType,TimeMicroseconds
-Phase 2,Heap Sort Full Array,100000,Top 500 Extraction,4144
-Phase 2,Build Heap + 500 Extract Max,100000,Top 500 Extraction,2505
+Phase 2,Heap Sort Full Array,100000,Top 500 Extraction,6501
+Phase 2,Build Heap + 500 Extract Max,100000,Top 500 Extraction,0
