@@ -15,7 +15,6 @@ private:
         std::vector<uint64_t> output(n);
         std::vector<int> count(256, 0);
         
-        // Count occurrences of each byte value
         for (int i = 0; i < n; i++) {
             int digit = (arr[i] >> (byte * 8)) & 0xFF;
             count[digit]++;
@@ -41,7 +40,7 @@ private:
     
 public:
     static void radixSort64(std::vector<uint64_t>& arr) {
-        // Sort by each byte (8 bytes for 64-bit)
+      
         for (int byte = 0; byte < 8; byte++) {
             countingSortByByte(arr, byte);
         }
